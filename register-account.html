@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Ký Tài Khoản</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-4">
+    <ul class="nav nav-pills mb-4 pb-3 border-bottom">
+        <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/register-account">Tài khoản</a></li>
+        <li class="nav-item"><a class="nav-link" href="/register-service">Dịch vụ</a></li>
+        <li class="nav-item"><a class="nav-link" href="/profile">Cá nhân</a></li>
+    </ul>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Đăng Ký Tài Khoản</h5>
+                </div>
+                <div class="card-body">
+                    <form id="accForm" action="/submit-account" method="POST">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tên đăng nhập (chỉ chữ/số):</label>
+                            <input type="text" id="username" name="username" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mật khẩu:</label>
+                            <div class="input-group">
+                                <input type="password" id="password" name="password" class="form-control" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">Ẩn/Hiện</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nhập lại mật khẩu:</label>
+                            <input type="password" id="rePassword" class="form-control" required>
+                            <div id="pass-match-msg" class="form-text text-danger" style="display:none;">Mật khẩu không khớp!</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Ngày sinh (16-90 tuổi):</label>
+                            <input type="date" id="dob" name="dob" class="form-control" required>
+                            <div id="dob-error" class="form-text text-danger" style="display:none;">Độ tuổi phải từ 16 đến 90!</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Gửi Đăng Ký</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('username').addEventListener('input', function() { 
+        this.value = this.value.replace(/[^a-zA-Z0-9]/g, ''); 
+    });
+
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        field.type = field.type === "password" ? "text" : "password";
+    }
+
+    document.getElementById('rePassword').addEventListener('input', function() {
+        const pass = document.getElementById('password').value;
+        document.getElementById('pass-match-msg').style.display = (this.value !== pass) ? 'block' : 'none';
+    });
+
+    document.getElementById('accForm').addEventListener('submit', function(e) {
+        if (document.getElementById('password').value !== document.getElementById('rePassword').value) {
+            e.preventDefault(); alert("Lỗi: Mật khẩu chưa khớp nhau!"); return;
+        }
+        const dob = new Date(document.getElementById('dob').value);
+        let age = new Date().getFullYear() - dob.getFullYear();
+        if (age < 16 || age > 90) {
+            e.preventDefault(); document.getElementById('dob-error').style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>

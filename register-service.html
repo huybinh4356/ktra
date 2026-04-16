@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Ký Dịch Vụ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-4">
+    <ul class="nav nav-pills mb-4 pb-3 border-bottom">
+        <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link" href="/register-account">Tài khoản</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/register-service">Dịch vụ</a></li>
+        <li class="nav-item"><a class="nav-link" href="/profile">Cá nhân</a></li>
+    </ul>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Đăng Ký Gói Dịch Vụ</h5>
+                </div>
+                <div class="card-body">
+                    <form id="srvForm" action="/submit-service" method="POST">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Chọn gói:</label>
+                            <select id="plan" name="plan" class="form-select" required onchange="calculateTotal()">
+                                <option value="" selected disabled>-- Vui lòng chọn gói --</option>
+                                <option value="100000">Gói Cơ Bản (100.000đ/tháng)</option>
+                                <option value="250000">Gói Cao Cấp (250.000đ/tháng)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Số tháng (1-24):</label>
+                            <input type="text" id="months" name="months" class="form-control" required oninput="calculateTotal()">
+                            <div id="month-error" class="form-text text-danger" style="display:none;">Chỉ nhập số từ 1 đến 24!</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Tổng tiền thanh toán (VNĐ):</label>
+                            <input type="text" id="totalPrice" name="totalPrice" class="form-control bg-light fw-bold text-success" readonly value="0 đ">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">Xác Nhận Dịch Vụ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const monthInput = document.getElementById('months');
+    monthInput.addEventListener('input', function() { 
+        this.value = this.value.replace(/[^0-9]/g, ''); 
+    });
+
+    function calculateTotal() {
+        const planPrice = parseInt(document.getElementById('plan').value) || 0;
+        const months = parseInt(monthInput.value) || 0;
+        const totalField = document.getElementById('totalPrice');
+
+        if (months > 0 && months <= 24) {
+            const total = planPrice * months;
+            totalField.value = total.toLocaleString('vi-VN') + " đ";
+            document.getElementById('month-error').style.display = 'none';
+        } else {
+            totalField.value = "0 đ";
+            if(monthInput.value !== "") document.getElementById('month-error').style.display = 'block';
+        }
+    }
+
+    document.getElementById('srvForm').addEventListener('submit', function(e) {
+        const m = parseInt(monthInput.value);
+        if (m < 1 || m > 24 || isNaN(m)) {
+            e.preventDefault(); alert("Vui lòng nhập đúng số tháng từ 1 đến 24!");
+        }
+    });
+</script>
+</body>
+</html>
