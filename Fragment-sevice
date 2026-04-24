@@ -1,0 +1,148 @@
+```html
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <div th:fragment="content">
+        
+        <style>
+            /* CSS đồng bộ với hệ thống */
+            .custom-card {
+                border: none;
+                border-radius: 15px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                background-color: #ffffff;
+            }
+            .custom-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+            }
+            /* Header màu xanh lá (Success) với Gradient */
+            .custom-card-header {
+                border-top-left-radius: 15px !important;
+                border-top-right-radius: 15px !important;
+                background: linear-gradient(135deg, #198754, #20c997) !important;
+                border-bottom: none;
+                padding: 1.2rem;
+            }
+            .custom-input {
+                border-radius: 8px;
+                padding: 0.6rem 1rem;
+            }
+            .custom-input:focus {
+                border-color: #198754;
+                box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+            }
+            /* Nút bấm Gradient xanh lá */
+            .btn-gradient-success {
+                background: linear-gradient(135deg, #198754, #20c997);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+            .btn-gradient-success:hover {
+                background: linear-gradient(135deg, #157347, #1ba87e);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+            }
+            .total-price-box {
+                background-color: #f8f9fa;
+                border: 2px dashed #198754;
+                color: #198754;
+                font-size: 1.2rem;
+            }
+        </style>
+
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card shadow custom-card">
+                        <div class="card-header text-white custom-card-header text-center">
+                            <h5 class="mb-0 fw-bold">Đăng Ký Gói Dịch Vụ</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            
+                            <form id="srvForm" th:action="@{/submit-service}" th:object="${serviceRequest}" method="POST">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Chọn gói dịch vụ</label>
+                                    <select id="plan" class="form-select custom-input" th:field="*{plan}" required onchange="calculateTotal()">
+                                        <option value="" selected disabled>-- Vui lòng chọn gói --</option>
+                                        <option value="100000">Gói Cơ Bản (100.000đ/tháng)</option>
+                                        <option value="250000">Gói Cao Cấp (250.000đ/tháng)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Số tháng đăng ký (1-24)</label>
+                                    <input type="text" id="months" class="form-control custom-input" th:field="*{months}" 
+                                           placeholder="Nhập số tháng" required oninput="calculateTotal()">
+                                    <div id="month-error" class="form-text text-danger" style="display:none;">
+                                        <i class="bi bi-info-circle"></i> Chỉ nhập số từ 1 đến 24!
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Tổng tiền thanh toán</label>
+                                    <input type="text" id="totalPriceDisplay" class="form-control total-price-box text-center fw-bold" 
+                                           readonly value="0 đ">
+                                    <input type="hidden" id="totalPrice" th:field="*{totalAmount}">
+                                </div>
+                                
+                                <div class="d-flex gap-3">
+                                    <button type="submit" class="btn btn-gradient-success flex-grow-1 p-2">Xác Nhận Dịch Vụ</button>
+                                    <a th:href="@{/}" class="btn btn-light border text-secondary p-2" style="border-radius: 8px;">Hủy</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                const monthInput = document.getElementById('months');
+                
+                // Chỉ cho phép nhập số
+                monthInput.addEventListener('input', function() { 
+                    this.value = this.value.replace(/[^0-9]/g, ''); 
+                });
+
+                function calculateTotal() {
+                    const planPrice = parseInt(document.getElementById('plan').value) || 0;
+                    const months = parseInt(monthInput.value) || 0;
+                    const totalDisplay = document.getElementById('totalPriceDisplay');
+                    const totalHidden = document.getElementById('totalPrice');
+
+                    if (months > 0 && months <= 24) {
+                        const total = planPrice * months;
+                        totalDisplay.value = total.toLocaleString('vi-VN') + " đ";
+                        totalHidden.value = total; // Lưu giá trị số vào input ẩn
+                        document.getElementById('month-error').style.display = 'none';
+                    } else {
+                        totalDisplay.value = "0 đ";
+                        totalHidden.value = 0;
+                        if(monthInput.value !== "") {
+                            document.getElementById('month-error').style.display = 'block';
+                        }
+                    }
+                }
+
+                // Kiểm tra lần cuối trước khi submit
+                document.getElementById('srvForm').addEventListener('submit', function(e) {
+                    const m = parseInt(monthInput.value);
+                    if (m < 1 || m > 24 || isNaN(m)) {
+                        e.preventDefault(); 
+                        alert("Vui lòng nhập đúng số tháng từ 1 đến 24!");
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+</body>
+</html>
+
+```
