@@ -1,0 +1,86 @@
+```html
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Fragment 'content' sẽ được nhúng vào vị trí tương ứng trong file Layout chính -->
+    <div th:fragment="content">
+        <div class="container mt-4">
+            <h3 class="mb-4">Gửi Yêu Cầu Hỗ Trợ Kỹ Thuật</h3>
+            
+            <!-- form gửi dữ liệu gắn với object supportRequest mà controller đã tạo. 
+                 Nhờ đó các ô nhập có thể map vào thuộc tính của SupportRequestDTO. -->
+            <form id="supportForm" th:action="@{/submit-support}" th:object="${supportRequest}" method="post">
+                
+                <div class="mb-3">
+                    <label class="form-label">Chủ đề cần hỗ trợ</label>
+                    <select class="form-select" th:field="*{topic}" required>
+                        <option value="" selected disabled>-- Lựa chọn vấn đề --</option>
+                        <option value="tech">Lỗi kỹ thuật / Hệ thống</option>
+                        <option value="billing">Thanh toán / Cước phí</option>
+                        <option value="other">Tư vấn dịch vụ khác</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Số điện thoại liên hệ (10 số)</label>
+                    <!-- Liên kết ô input với thuộc tính phone của object -->
+                    <input type="text" class="form-control" th:field="*{phone}" id="phone" maxlength="10" placeholder="Nhập số điện thoại" required>
+                    <div id="phone-error" class="form-text text-danger" style="display:none;">Vui lòng nhập đúng 10 số.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mô tả chi tiết vấn đề</label>
+                    <!-- Liên kết textarea với thuộc tính message của object -->
+                    <textarea class="form-control" th:field="*{message}" id="message" rows="4" maxlength="250" placeholder="Nhập mô tả chi tiết..." required oninput="validateMessage()"></textarea>
+                    <div class="d-flex justify-content-between form-text">
+                        <span id="msg-warning" class="text-danger">Cần nhập ít nhất 10 ký tự.</span>
+                        <span>Còn lại: <strong id="charCount">250</strong> ký tự</span>
+                    </div>
+                </div>
+
+                <!-- Nút Submit và nút Hủy theo thiết kế của bạn -->
+                <button type="submit" id="btnSubmit" class="btn btn-warning" disabled>Gửi Yêu Cầu</button>
+                <a th:href="@{/support}" class="btn btn-secondary">Hủy</a>
+            </form>
+
+            <!-- Script xử lý Validate Form được đặt gọn trong fragment để có hiệu lực khi Render layout -->
+            <script>
+                // Ràng buộc chỉ cho phép nhập số
+                document.getElementById('phone').addEventListener('input', function() { 
+                    this.value = this.value.replace(/[^0-9]/g, ''); 
+                });
+
+                // Kiểm tra độ dài message
+                function validateMessage() {
+                    const msgInput = document.getElementById('message');
+                    const currentLength = msgInput.value.length;
+                    const btnSubmit = document.getElementById('btnSubmit');
+                    const warning = document.getElementById('msg-warning');
+                    
+                    document.getElementById('charCount').innerText = 250 - currentLength;
+
+                    if (currentLength >= 10) {
+                        btnSubmit.disabled = false;
+                        warning.style.display = 'none';
+                    } else {
+                        btnSubmit.disabled = true;
+                        warning.style.display = 'block';
+                    }
+                }
+
+                // Kiểm tra điều kiện Submit
+                document.getElementById('supportForm').addEventListener('submit', function(e) {
+                    if (document.getElementById('phone').value.length !== 10) {
+                        e.preventDefault(); 
+                        document.getElementById('phone-error').style.display = 'block';
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+</body>
+</html>
+
+```
