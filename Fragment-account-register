@@ -1,0 +1,161 @@
+```html
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Fragment 'content' sẽ được nhúng vào vị trí tương ứng trong file Layout chính -->
+    <div th:fragment="content">
+        
+        <!-- Thêm một chút CSS tùy chỉnh để làm nổi bật form -->
+        <style>
+            /* Hiệu ứng nổi lên cho thẻ Card khi hover */
+            .custom-card {
+                border: none;
+                border-radius: 15px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                background-color: #ffffff;
+            }
+            .custom-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+            }
+            /* Cấu trúc Header của Card với dải màu Gradient */
+            .custom-card-header {
+                border-top-left-radius: 15px !important;
+                border-top-right-radius: 15px !important;
+                background: linear-gradient(135deg, #0d6efd, #0dcaf0) !important;
+                border-bottom: none;
+                padding: 1rem 1.5rem;
+            }
+            /* Bo góc mềm mại hơn cho các ô nhập liệu */
+            .custom-input {
+                border-radius: 8px;
+                padding: 0.6rem 1rem;
+                border: 1px solid #ced4da;
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+            .custom-input:focus {
+                border-color: #0dcaf0;
+                box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+            }
+            /* Tùy chỉnh Nút bấm */
+            .btn-custom {
+                border-radius: 8px;
+                padding: 0.6rem 1.2rem;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+            .btn-gradient {
+                background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+                color: white;
+                border: none;
+            }
+            .btn-gradient:hover {
+                background: linear-gradient(135deg, #0b5ed7, #0aaccc);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+            }
+            .btn-outline-secondary {
+                border-radius: 0 8px 8px 0; /* Khớp với ô input group */
+            }
+            /* Tùy chỉnh Label */
+            .form-label {
+                font-weight: 500;
+                color: #495057;
+                margin-bottom: 0.4rem;
+            }
+        </style>
+
+        <div class="container mt-5 mb-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card shadow custom-card">
+                        <div class="card-header text-white custom-card-header">
+                            <h5 class="mb-0 text-center fw-bold">Đăng Ký Tài Khoản</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            
+                            <!-- Form gửi dữ liệu gắn với object 'account' -->
+                            <form id="accForm" th:action="@{/submit-account}" th:object="${account}" method="POST">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Tên đăng nhập (chỉ chữ/số)</label>
+                                    <input type="text" id="username" class="form-control custom-input" th:field="*{username}" placeholder="Nhập tên đăng nhập" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Mật khẩu</label>
+                                    <div class="input-group">
+                                        <!-- style="border-radius: 8px 0 0 8px;" để khớp với nút Ẩn/hiện -->
+                                        <input type="password" id="password" class="form-control custom-input" style="border-radius: 8px 0 0 8px;" th:field="*{password}" placeholder="Nhập mật khẩu" required>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">Ẩn/Hiện</button>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Nhập lại mật khẩu</label>
+                                    <input type="password" id="rePassword" class="form-control custom-input" placeholder="Xác nhận mật khẩu" required>
+                                    <div id="pass-match-msg" class="form-text text-danger mt-2" style="display:none;">
+                                        <i class="bi bi-exclamation-circle"></i> Mật khẩu không khớp!
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Ngày sinh (16-90 tuổi)</label>
+                                    <input type="date" id="dob" class="form-control custom-input" th:field="*{dob}" required>
+                                    <div id="dob-error" class="form-text text-danger mt-2" style="display:none;">
+                                        <i class="bi bi-exclamation-circle"></i> Độ tuổi phải từ 16 đến 90!
+                                    </div>
+                                </div>
+
+                                <!-- Nút Submit và nút Hủy -->
+                                <div class="d-flex gap-3 mt-4">
+                                    <button type="submit" class="btn btn-gradient btn-custom flex-grow-1">Gửi Đăng Ký</button>
+                                    <a th:href="@{/}" class="btn btn-light border btn-custom text-secondary" style="min-width: 100px;">Hủy</a>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Script xử lý Validate Form -->
+            <script>
+                document.getElementById('username').addEventListener('input', function() { 
+                    this.value = this.value.replace(/[^a-zA-Z0-9]/g, ''); 
+                });
+
+                function togglePassword(fieldId) {
+                    const field = document.getElementById(fieldId);
+                    field.type = field.type === "password" ? "text" : "password";
+                }
+
+                document.getElementById('rePassword').addEventListener('input', function() {
+                    const pass = document.getElementById('password').value;
+                    document.getElementById('pass-match-msg').style.display = (this.value !== pass) ? 'block' : 'none';
+                });
+
+                document.getElementById('accForm').addEventListener('submit', function(e) {
+                    if (document.getElementById('password').value !== document.getElementById('rePassword').value) {
+                        e.preventDefault(); 
+                        alert("Lỗi: Mật khẩu chưa khớp nhau!"); 
+                        return;
+                    }
+                    const dob = new Date(document.getElementById('dob').value);
+                    let age = new Date().getFullYear() - dob.getFullYear();
+                    if (age < 16 || age > 90) {
+                        e.preventDefault(); 
+                        document.getElementById('dob-error').style.display = 'block';
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
+```
