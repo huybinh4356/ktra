@@ -1,0 +1,237 @@
+```html
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Fragment 'content' dành cho trang Hồ sơ cá nhân -->
+    <div th:fragment="content">
+        
+        <style>
+            /* Cấu trúc Card chung */
+            .custom-card {
+                border: none;
+                border-radius: 15px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                background-color: #ffffff;
+            }
+            .custom-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+            }
+            
+            /* Header màu Đen xám cho Form */
+            .card-header-dark {
+                border-top-left-radius: 15px !important;
+                border-top-right-radius: 15px !important;
+                background: linear-gradient(135deg, #212529, #495057) !important;
+                border-bottom: none;
+                padding: 1.2rem;
+            }
+
+            /* Header màu Trắng viền Xanh cho Thẻ Xem Trước */
+            .card-header-outline {
+                border-top-left-radius: 15px !important;
+                border-top-right-radius: 15px !important;
+                background-color: transparent !important;
+                border-bottom: 2px solid #0d6efd !important;
+                padding: 1.2rem;
+            }
+            .preview-card {
+                border: 1px solid rgba(13, 110, 253, 0.2);
+            }
+            
+            /* Tùy chỉnh ô nhập liệu */
+            .custom-input {
+                border-radius: 8px;
+                padding: 0.6rem 1rem;
+            }
+            .custom-input:focus {
+                border-color: #495057;
+                box-shadow: 0 0 0 0.25rem rgba(73, 80, 87, 0.25);
+            }
+            
+            /* Nút bấm Gradient Đen/Xám */
+            .btn-gradient-dark {
+                background: linear-gradient(135deg, #212529, #495057);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+            .btn-gradient-dark:hover {
+                background: linear-gradient(135deg, #000000, #343a40);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(33, 37, 41, 0.3);
+            }
+
+            /* Tùy chỉnh list-group cho Thẻ xem trước */
+            .custom-list-item {
+                padding: 1rem;
+                border-color: rgba(0,0,0,0.05);
+                display: flex;
+                flex-direction: column;
+            }
+            .custom-list-item strong {
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                color: #6c757d;
+                margin-bottom: 0.2rem;
+            }
+            .custom-list-item span {
+                font-size: 1.05rem;
+                color: #212529;
+                word-break: break-word;
+            }
+        </style>
+
+        <div class="container mt-5">
+            <div class="row">
+                
+                <!-- BÊN TRÁI: FORM NHẬP LIỆU -->
+                <div class="col-md-7 mb-4">
+                    <div class="card shadow custom-card">
+                        <div class="card-header text-white card-header-dark text-center">
+                            <h5 class="mb-0 fw-bold">Hồ Sơ Cá Nhân</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            
+                            <!-- Form gắn với object profileRequest từ Controller -->
+                            <form id="proForm" th:action="@{/submit-profile}" th:object="${profileRequest}" method="POST">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Họ và tên</label>
+                                    <input type="text" id="fullname" class="form-control custom-input" th:field="*{fullname}" 
+                                           placeholder="Ví dụ: Nguyễn Văn A" required oninput="updatePreview()">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Số điện thoại</label>
+                                    <input type="text" id="phone" class="form-control custom-input" th:field="*{phone}" 
+                                           maxlength="10" placeholder="Nhập 10 số điện thoại" required oninput="updatePreview()">
+                                    <div id="phone-error" class="form-text text-danger mt-1" style="display:none;">
+                                        <i class="bi bi-exclamation-circle"></i> Số điện thoại phải đủ 10 số!
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Giới tính</label>
+                                    <select id="gender" class="form-select custom-input" th:field="*{gender}" onchange="updatePreview()">
+                                        <option value="Nam">Nam</option>
+                                        <option value="Nữ">Nữ</option>
+                                        <option value="Khác">Khác</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Địa chỉ</label>
+                                    <textarea id="address" class="form-control custom-input" th:field="*{address}" rows="3" 
+                                              maxlength="100" placeholder="Nhập địa chỉ của bạn..." oninput="countChar()"></textarea>
+                                    <div class="form-text text-end mt-1">
+                                        Còn lại: <span id="charCount" class="fw-bold text-primary">100</span> ký tự
+                                    </div>
+                                </div>
+                                
+                                <!-- Cụm nút bấm Xác nhận và Hủy -->
+                                <div class="d-flex gap-3 mt-2">
+                                    <button type="submit" class="btn btn-gradient-dark flex-grow-1 p-2">Cập Nhật Thông Tin</button>
+                                    <a th:href="@{/}" class="btn btn-light border text-secondary p-2" style="border-radius: 8px; min-width: 100px;">Hủy</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BÊN PHẢI: THẺ XEM TRƯỚC -->
+                <div class="col-md-5">
+                    <!-- sticky-top giúp thẻ xem trước trượt theo khi cuộn trang -->
+                    <div class="card shadow-sm custom-card preview-card sticky-top" style="top: 2rem;">
+                        <div class="card-header card-header-outline text-primary text-center">
+                            <h6 class="mb-0 fw-bold text-uppercase"><i class="bi bi-person-vcard"></i> Thẻ Xem Trước</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush" style="border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; overflow: hidden;">
+                                <li class="list-group-item custom-list-item">
+                                    <strong>Họ và tên</strong> 
+                                    <span id="prev-name" class="text-muted fst-italic">Đang chờ nhập...</span>
+                                </li>
+                                <li class="list-group-item custom-list-item">
+                                    <strong>Số điện thoại</strong> 
+                                    <span id="prev-phone" class="text-muted fst-italic">Đang chờ nhập...</span>
+                                </li>
+                                <li class="list-group-item custom-list-item">
+                                    <strong>Giới tính</strong> 
+                                    <span id="prev-gender" class="text-muted">Nam</span>
+                                </li>
+                                <li class="list-group-item custom-list-item">
+                                    <strong>Địa chỉ</strong> 
+                                    <span id="prev-address" class="text-muted fst-italic">Đang chờ nhập...</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <script>
+                // Regex: Chỉ cho phép chữ cái (kể cả tiếng Việt có dấu) và khoảng trắng
+                document.getElementById('fullname').addEventListener('input', function() { 
+                    this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, ''); 
+                });
+                
+                // Regex: Chỉ cho phép nhập số
+                document.getElementById('phone').addEventListener('input', function() { 
+                    this.value = this.value.replace(/[^0-9]/g, ''); 
+                });
+
+                function countChar() {
+                    const addr = document.getElementById('address');
+                    document.getElementById('charCount').innerText = 100 - addr.value.length;
+                    updatePreview();
+                }
+
+                function updatePreview() {
+                    const nameVal = document.getElementById('fullname').value;
+                    const phoneVal = document.getElementById('phone').value;
+                    const addrVal = document.getElementById('address').value;
+
+                    // Thay đổi class text-muted/fst-italic dựa trên việc có dữ liệu hay chưa
+                    const pName = document.getElementById('prev-name');
+                    pName.innerText = nameVal || "Đang chờ nhập...";
+                    pName.className = nameVal ? "" : "text-muted fst-italic";
+
+                    const pPhone = document.getElementById('prev-phone');
+                    pPhone.innerText = phoneVal || "Đang chờ nhập...";
+                    pPhone.className = phoneVal ? "" : "text-muted fst-italic";
+
+                    document.getElementById('prev-gender').innerText = document.getElementById('gender').value;
+                    document.getElementById('prev-gender').className = ""; // Giới tính luôn có giá trị mặc định
+
+                    const pAddr = document.getElementById('prev-address');
+                    pAddr.innerText = addrVal || "Đang chờ nhập...";
+                    pAddr.className = addrVal ? "" : "text-muted fst-italic";
+                }
+
+                // Kiểm tra trước khi submit
+                document.getElementById('proForm').addEventListener('submit', function(e) {
+                    if (document.getElementById('phone').value.length !== 10) {
+                        e.preventDefault(); 
+                        document.getElementById('phone-error').style.display = 'block';
+                    }
+                });
+
+                // Khởi tạo preview lần đầu khi tải trang (Trường hợp edit data cũ)
+                window.onload = function() {
+                    updatePreview();
+                    countChar();
+                };
+            </script>
+        </div>
+    </div>
+
+</body>
+</html>
+
+```
