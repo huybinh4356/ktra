@@ -1,0 +1,43 @@
+# --- BÀI 1: ĐỔI TIỀN (COIN CHANGING) ---
+def doi_tien(so_tien, menh_gia):
+    menh_gia.sort(reverse=True) # Sắp xếp tiền lớn nhất lên đầu
+    ket_qua = {}
+    for dong_tien in menh_gia:
+        so_to, so_tien = divmod(so_tien, dong_tien) # Lấy số tờ và số dư còn lại
+        if so_to > 0:
+            ket_qua[dong_tien] = so_to
+    return ket_qua
+
+# --- BÀI 3: LẬP LỊCH (INTERVAL SCHEDULING) ---
+def lap_lich(cong_viec):
+    # cong_viec: [(start, end), ...]
+    cong_viec.sort(key=lambda x: x[1]) # QUAN TRỌNG: Sắp xếp theo giờ kết thúc
+    lich_chon = [cong_viec[0]]
+    ket_thuc_gan_nhat = cong_viec[0][1]
+    
+    for i in range(1, len(cong_viec)):
+        if cong_viec[i][0] >= ket_thuc_gan_nhat: # Nếu việc mới bắt đầu sau việc cũ kết thúc
+            lich_chon.append(cong_viec[i])
+            ket_thuc_gan_nhat = cong_viec[i][1]
+    return lich_chon
+
+# --- BÀI 5 & 6: BALO (KNAPSACK) THAM LAM ---
+def balo_tham_lam(suc_chua, tui_hang, tieu_chi='max'):
+    # tui_hang: [[weight, size], ...]
+    if tieu_chi == 'max': # Bài 5: Ưu tiên tỷ lệ khối lượng/kích thước cao nhất
+        tui_hang.sort(key=lambda x: x[0]/x[1], reverse=True)
+    else: # Bài 6: Ưu tiên gói nhẹ nhất (khối lượng tăng dần)
+        tui_hang.sort(key=lambda x: x[0])
+    
+    chon, tong_w, tong_s = [], 0, 0
+    for hang in tui_hang:
+        if tong_s + hang[1] <= suc_chua:
+            chon.append(hang)
+            tong_w += hang[0]
+            tong_s += hang[1]
+    return chon, tong_w
+
+# --- CHẠY THỬ PHẦN 1 ---
+print("--- THAM LAM ---")
+print("Đổi 288đ:", doi_tien(288, [1, 2, 5, 10, 20, 50, 100]))
+print("Lịch sớm nhất:", lap_lich([(1, 4), (3, 5), (0, 6), (5, 7), (3, 9), (5, 9), (6, 10), (8, 11)]))
