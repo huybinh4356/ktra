@@ -1,0 +1,142 @@
+import heapq
+from collections import deque
+
+# ==========================================
+# BÀI 1: TÌM KIẾM HEURISTIC (THUẬT TOÁN A*)
+# ==========================================
+def a_star_search(graph, h, start, goal):
+    open_set = []
+    heapq.heappush(open_set, (h[start], start, [start], 0))
+    closed_set = set()
+
+    print(f"{'Bước':<5} | {'Đỉnh xét':<10} | {'f(n)':<5} | {'Open Set (Các đỉnh chờ duyệt)'}")
+    print("-" * 65)
+    step = 1
+
+    while open_set:
+        f, current, path, g = heapq.heappop(open_set)
+        
+        open_list_str = ", ".join([f"{n}({f_val})" for f_val, n, _, _ in open_set])
+        print(f"{step:<5} | {current:<10} | {f:<5} | {{{open_list_str}}}")
+        step += 1
+
+        if current == goal:
+            return path, g
+
+        if current in closed_set:
+            continue
+        closed_set.add(current)
+
+        for neighbor, weight in graph.get(current, []):
+            if neighbor not in closed_set:
+                new_g = g + weight
+                new_f = new_g + h[neighbor]
+                heapq.heappush(open_set, (new_f, neighbor, path + [neighbor], new_g))
+
+    return None, 0
+
+# ==========================================
+# BÀI 2: TÌM KIẾM MÙ (BFS VÀ DFS)
+# ==========================================
+def bfs(graph, start, goal):
+    queue = deque([start])
+    visited = []
+    
+    while queue:
+        node = queue.popleft() 
+        if node not in visited:
+            visited.append(node)
+            if node == goal:
+                break
+            queue.extend(graph.get(node, []))
+            
+    return visited
+
+def dfs(graph, start, goal):
+    stack = [start]
+    visited = []
+    
+    while stack:
+        node = stack.pop() 
+        if node not in visited:
+            visited.append(node)
+            if node == goal:
+                break
+            neighbors = reversed(graph.get(node, []))
+            stack.extend(neighbors)
+            
+    return visited
+
+# ==========================================
+# BÀI 3: CẮT TỈA ALPHA-BETA
+# ==========================================
+def alpha_beta(node_name, is_max, children_dict, alpha, beta):
+    if isinstance(children_dict.get(node_name), int):
+        return children_dict[node_name]
+
+    if is_max:
+        best_val = float('-inf')
+        for child in children_dict.get(node_name, []):
+            val = alpha_beta(child, False, children_dict, alpha, beta)
+            best_val = max(best_val, val)
+            alpha = max(alpha, best_val)
+            
+            if beta <= alpha:
+                print(f"  [!] Nhánh Alpha CẮT TỈA tại nút MAX '{node_name}' khi xét xong con '{child}' (Vì beta {beta} <= alpha {alpha})")
+                break
+        return best_val
+    else:
+        best_val = float('inf')
+        for child in children_dict.get(node_name, []):
+            val = alpha_beta(child, True, children_dict, alpha, beta)
+            best_val = min(best_val, val)
+            beta = min(beta, best_val)
+            
+            if beta <= alpha:
+                print(f"  [!] Nhánh Beta CẮT TỈA tại nút MIN '{node_name}' khi xét xong con '{child}' (Vì beta {beta} <= alpha {alpha})")
+                break
+        return best_val
+
+# ==========================================
+# PHẦN CHẠY CHƯƠNG TRÌNH (MAIN)
+# ==========================================
+if __name__ == "__main__":
+    # --- Chạy Bài 1 ---
+    print("\n" + "="*50)
+    print(" BÀI 1: THUẬT TOÁN TÌM KIẾM A*")
+    print("="*50)
+    graph_A_star = {
+        'S': [('A', 2), ('B', 3)], 'A': [('C', 3), ('D', 4)],
+        'B': [('E', 4), ('F', 1)], 'C': [('G', 4)],
+        'D': [('G', 2)], 'E': [('G', 3)], 'F': [('G', 4)]
+    }
+    h_values = {'S': 6, 'A': 4, 'B': 4, 'C': 3, 'D': 2, 'E': 2, 'F': 3, 'G': 0}
+    path, cost = a_star_search(graph_A_star, h_values, 'S', 'G')
+    print("-" * 65)
+    print(f"-> Đường đi tối ưu: {' -> '.join(path)}")
+    print(f"-> Tổng chi phí g(n): {cost}")
+
+    # --- Chạy Bài 2 ---
+    print("\n" + "="*50)
+    print(" BÀI 2: TÌM KIẾM MÙ (BFS & DFS)")
+    print("="*50)
+    tree_blind = {
+        'A': ['B', 'C', 'D'], 'B': ['E', 'F'],
+        'C': ['G', 'H'], 'D': ['I', 'J'], 'F': ['K']
+    }
+    print("-> Thứ tự duyệt BFS (Theo mức):      ", " -> ".join(bfs(tree_blind, 'A', 'K')))
+    print("-> Thứ tự duyệt DFS (Theo chiều sâu):", " -> ".join(dfs(tree_blind, 'A', 'K')))
+
+    # --- Chạy Bài 3 ---
+    print("\n" + "="*50)
+    print(" BÀI 3: CẮT TỈA ALPHA-BETA")
+    print("="*50)
+    game_tree = {
+        'A': ['B', 'C', 'D'], 
+        'B': ['B1', 'B2'], 'C': ['C1', 'C2'], 'D': ['D1', 'D2'],
+        'B1': 4, 'B2': 8, 'C1': 9, 'C2': 3, 'D1': 2, 'D2': 7
+    }
+    optimal_value = alpha_beta('A', True, game_tree, float('-inf'), float('inf'))
+    print("-" * 50)
+    print(f"-> Giá trị tối ưu tại nút gốc A: {optimal_value}\n")
+
