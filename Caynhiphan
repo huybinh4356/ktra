@@ -1,0 +1,44 @@
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier, export_text
+
+# ==========================================
+# 1. TẠO DỮ LIỆU MẪU (Thay vì đọc file cho rườm rà)
+# Bài toán kinh điển: Quyết định đi chơi Tennis dựa vào Thời tiết
+# ==========================================
+data = {
+    'ThoiTiet': [0, 0, 1, 2, 2, 2, 1, 0, 0, 2], # 0: Nắng, 1: Âm u, 2: Mưa
+    'NhietDo':  [2, 2, 2, 1, 0, 0, 0, 1, 0, 1], # 0: Lạnh, 1: Vừa, 2: Nóng
+    'DoAm':     [1, 1, 1, 1, 0, 0, 0, 1, 0, 0], # 0: Bình thường, 1: Cao
+    'Gio':      [0, 1, 0, 0, 0, 1, 1, 0, 0, 0], # 0: Yếu, 1: Mạnh
+    'DiChoi':   [0, 0, 1, 1, 1, 0, 1, 0, 1, 1]  # 0: Nghỉ, 1: Đi chơi
+}
+df = pd.DataFrame(data)
+
+# Tách đặc trưng (X) và nhãn (y)
+X = df[['ThoiTiet', 'NhietDo', 'DoAm', 'Gio']]
+y = df['DiChoi']
+
+# ==========================================
+# 2. GỌI THƯ VIỆN ĐỂ TRỒNG CÂY
+# ==========================================
+# criterion='entropy' chính là thuật toán ID3
+cay_quyet_dinh = DecisionTreeClassifier(criterion='entropy', max_depth=3, random_state=42)
+
+# Cho cây học dữ liệu
+cay_quyet_dinh.fit(X, y)
+
+# ==========================================
+# 3. IN KẾT QUẢ CÂY DƯỚI DẠNG LUẬT (TEXT)
+# ==========================================
+print("=== CẤU TRÚC CÂY QUYẾT ĐỊNH ===")
+luat_cua_cay = export_text(cay_quyet_dinh, feature_names=list(X.columns))
+print(luat_cua_cay)
+
+# ==========================================
+# 4. DỰ ĐOÁN THỬ MỘT NGÀY MỚI
+# ==========================================
+# Hôm nay: Nắng (0), Nóng (2), Độ ẩm Cao (1), Gió Yếu (0)
+ngay_moi = [[0, 2, 1, 0]]
+ket_qua = cay_quyet_dinh.predict(ngay_moi)
+print(f"-> Dự đoán cho ngày mới: {'Đi chơi' if ket_qua[0] == 1 else 'Nghỉ ở nhà'}")
+pip install scikit-learn pandas
